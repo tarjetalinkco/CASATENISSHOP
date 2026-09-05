@@ -32,8 +32,171 @@
 
   <title>CASA TENIS SHOP</title>
   <link rel="manifest" href="manifest.json?v=2">
+  <style>
+    #pwa-install-button {
+      position: fixed;
+      right: 18px;
+      bottom: max(86px, calc(env(safe-area-inset-bottom) + 74px));
+      z-index: 9999;
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      min-height: 48px;
+      padding: 0 18px;
+      border: 0;
+      border-radius: 999px;
+      color: #06111f;
+      background: #19d8f5;
+      box-shadow: 0 8px 24px rgba(6, 17, 31, 0.28);
+      font: 700 14px/1 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      cursor: pointer;
+    }
+
+    #pwa-install-button:hover {
+      background: #54e5fa;
+      transform: translateY(-1px);
+    }
+
+    #pwa-install-button:focus-visible {
+      outline: 3px solid #ffffff;
+      outline-offset: 3px;
+    }
+
+    #pwa-install-button[hidden],
+    #pwa-install-help[hidden] {
+      display: none !important;
+    }
+
+    #pwa-install-help {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: rgba(6, 17, 31, 0.58);
+    }
+
+    .pwa-install-card {
+      width: min(420px, 100%);
+      padding: 24px;
+      border-radius: 20px;
+      background: #ffffff;
+      color: #0a1628;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.3);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .pwa-install-card h2 {
+      margin: 0 0 10px;
+      font-size: 20px;
+    }
+
+    .pwa-install-card p {
+      margin: 0 0 20px;
+      color: #425269;
+      line-height: 1.5;
+    }
+
+    .pwa-install-card button {
+      float: right;
+      min-height: 42px;
+      padding: 0 18px;
+      border: 0;
+      border-radius: 999px;
+      color: #ffffff;
+      background: #0a1628;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    @media (max-width: 480px) {
+      #pwa-install-button {
+        right: 12px;
+        bottom: max(78px, calc(env(safe-area-inset-bottom) + 70px));
+        padding: 0 15px;
+      }
+    }
+  </style>
 </head>
 <body>
+  <button id="pwa-install-button" type="button" aria-label="Instalar CASA TENIS SHOP" hidden>
+    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="currentColor" d="M12 3a1 1 0 0 1 1 1v9.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 1 1 1.4-1.42l2.3 2.3V4a1 1 0 0 1 1-1ZM5 19a1 1 0 0 1 1 1h12a1 1 0 1 1 0 2H6a1 1 0 0 1-1-1v-1a1 1 0 0 1 1-1Z"/>
+    </svg>
+    <span>Instalar app</span>
+  </button>
+
+  <div id="pwa-install-help" role="dialog" aria-modal="true" aria-labelledby="pwa-install-title" hidden>
+    <div class="pwa-install-card">
+      <h2 id="pwa-install-title">Instalar CASA TENIS SHOP</h2>
+      <p id="pwa-install-message"></p>
+      <button id="pwa-install-close" type="button">Entendido</button>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      let deferredInstallPrompt = null;
+      const installButton = document.getElementById('pwa-install-button');
+      const helpDialog = document.getElementById('pwa-install-help');
+      const helpMessage = document.getElementById('pwa-install-message');
+      const closeHelp = document.getElementById('pwa-install-close');
+      const standaloneQuery = window.matchMedia('(display-mode: standalone)');
+
+      const isStandalone = () =>
+        standaloneQuery.matches || window.navigator.standalone === true;
+
+      const refreshButton = () => {
+        installButton.hidden = isStandalone();
+      };
+
+      const showManualHelp = () => {
+        const isAppleMobile = /iphone|ipad|ipod/i.test(navigator.userAgent);
+        helpMessage.textContent = isAppleMobile
+          ? 'En Safari, toca Compartir y selecciona “Agregar a pantalla de inicio”.'
+          : 'Abre el menú del navegador (⋮) y selecciona “Instalar aplicación” o “Agregar a pantalla principal”.';
+        helpDialog.hidden = false;
+        closeHelp.focus();
+      };
+
+      window.addEventListener('beforeinstallprompt', (event) => {
+        event.preventDefault();
+        deferredInstallPrompt = event;
+        refreshButton();
+      });
+
+      installButton.addEventListener('click', async () => {
+        if (!deferredInstallPrompt) {
+          showManualHelp();
+          return;
+        }
+        deferredInstallPrompt.prompt();
+        const choice = await deferredInstallPrompt.userChoice;
+        deferredInstallPrompt = null;
+        if (choice.outcome === 'accepted') installButton.hidden = true;
+      });
+
+      closeHelp.addEventListener('click', () => {
+        helpDialog.hidden = true;
+        installButton.focus();
+      });
+
+      helpDialog.addEventListener('click', (event) => {
+        if (event.target === helpDialog) closeHelp.click();
+      });
+
+      window.addEventListener('appinstalled', () => {
+        deferredInstallPrompt = null;
+        installButton.hidden = true;
+        helpDialog.hidden = true;
+      });
+
+      standaloneQuery.addEventListener?.('change', refreshButton);
+      window.addEventListener('load', refreshButton);
+      refreshButton();
+    })();
+  </script>
   <!--
     You can customize the "flutter_bootstrap.js" script.
     This is useful to provide a custom configuration to the Flutter loader
