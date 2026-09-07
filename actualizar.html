@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0A1628">
+  <title>Actualizando CASA TENIS SHOP</title>
+  <style>
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      color: #0a1628;
+      background: #f2f6fa;
+      font: 16px/1.5 system-ui, sans-serif;
+      text-align: center;
+    }
+    main { max-width: 420px; }
+    h1 { font-size: 24px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Actualizando CASA TENIS SHOP</h1>
+    <p>Estamos cargando la versión más reciente de la tienda.</p>
+  </main>
+  <script>
+    (async () => {
+      try {
+        if ('serviceWorker' in navigator) {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(registrations.map((registration) => registration.unregister()));
+        }
+        if ('caches' in window) {
+          const names = await caches.keys();
+          await Promise.all(names.map((name) => caches.delete(name)));
+        }
+      } finally {
+        window.location.replace('./?actualizado=20260907-1');
+      }
+    })();
+  </script>
+</body>
+</html>
